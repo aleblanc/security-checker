@@ -1,11 +1,10 @@
 {
-    "name": "sensiolabs/security-checker",
+    "name": "aleblanc/security-checker",
     "description": "A security checker for your composer.lock",
     "license": "MIT",
     "authors": [
         {
-            "name": "Fabien Potencier",
-            "email": "fabien.potencier@gmail.com"
+            "name": "Alexandre LEBLANC"
         }
     ],
     "require": {
