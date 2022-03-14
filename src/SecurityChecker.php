@@ -15,7 +15,7 @@ class SecurityChecker
         $this->crawler = null === $crawler ? new Crawler() : $crawler;
     }
 
-    public function check(string $lock, string $format = 'json'): string
+    public function check(string $lock, string $format = 'json'): array
     {
         if (0 !== strpos($lock, 'data://text/plain;base64,')) {
             if (is_dir($lock) && file_exists($lock.'/composer.lock')) {

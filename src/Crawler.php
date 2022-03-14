@@ -14,7 +14,7 @@ class Crawler
     private $endPoint = 'https://codeload.github.com/github/advisory-database/zip/main';
     
     
-    public function check($lock, $format = 'json'): string
+    public function check($lock, $format = 'json'): array
     {
         return $this->doCheck($lock, $format);
     }
