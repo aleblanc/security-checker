@@ -58,13 +58,13 @@ class Crawler
         //@todo serializer
         $decodeJson = \GuzzleHttp\json_decode($lockContent);
         
-        $path = dirname(__FILE__) . '/../../../../../var/cache/security-cheker/';
+        $path = dirname(__FILE__) . '/../../../../var/cache/security-cheker/';
         $this->extractTo($this->endPoint,$path);
         
         
         //parse json files
         
-        $path = dirname(__FILE__) . '/../../../../../var/cache/security-cheker/advisory-database-main/advisories/github-reviewed/';
+        $path = dirname(__FILE__) . '/../../../../var/cache/security-cheker/advisory-database-main/advisories/github-reviewed/';
         $yaml = new Parser();
         $finder = new Finder();
         $parsedData = array();
