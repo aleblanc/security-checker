@@ -1,6 +1,6 @@
 {
     "name": "aleblanc/security-checker",
-    "description": "A security checker for your composer.lock",
+    "description": "A security checker for your composer.lock with github/advisory-database",
     "license": "MIT",
     "authors": [
         {

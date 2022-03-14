@@ -1,13 +1,5 @@
 <?php
 
-/*
- * This file is part of the SensioLabs Security Checker.
- *
- * (c) Fabien Potencier
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
 
 namespace SensioLabs\Security\Command;
 
@@ -21,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SecurityCheckerCommand extends Command
 {
-    protected static $defaultName = 'security:check';
+    protected static $defaultName = 'al:security:check';
 
     private $checker;
 
@@ -38,13 +30,9 @@ class SecurityCheckerCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('security:check')
+            ->setName('al:security:check')
             ->setDefinition([
-                new InputArgument('lockfile', InputArgument::OPTIONAL, 'The path to the composer.lock file', 'composer.lock'),
-                new InputOption('format', '', InputOption::VALUE_REQUIRED, 'The output format', 'ansi'),
-                new InputOption('end-point', '', InputOption::VALUE_REQUIRED, 'The security checker server URL'),
-                new InputOption('timeout', '', InputOption::VALUE_REQUIRED, 'The HTTP timeout in seconds'),
-                new InputOption('token', '', InputOption::VALUE_REQUIRED, 'The server token', ''),
+                new InputArgument('lockfile', InputArgument::OPTIONAL, 'The path to the composer.lock file', 'composer.lock')
             ])
             ->setDescription('Checks security issues in your project dependencies')
             ->setHelp(<<<EOF
@@ -71,34 +59,39 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($endPoint = $input->getOption('end-point')) {
-            $this->checker->getCrawler()->setEndPoint($endPoint);
-        }
-
-        if ($timeout = $input->getOption('timeout')) {
-            $this->checker->getCrawler()->setTimeout($timeout);
-        }
-
-        if ($token = $input->getOption('token')) {
-            $this->checker->getCrawler()->setToken($token);
-        }
-
-        $format = $input->getOption('format');
-        if ($input->getOption('no-ansi') && 'ansi' === $format) {
-            $format = 'text';
-        }
-
         try {
-            $result = $this->checker->check($input->getArgument('lockfile'), $format);
+            $vulnerabilities = $this->checker->check($input->getArgument('lockfile'));
         } catch (ExceptionInterface $e) {
             $output->writeln($this->getHelperSet()->get('formatter')->formatBlock($e->getMessage(), 'error', true));
 
             return 1;
         }
+        
 
-        $output->writeln((string) $result);
-
-        if (\count($result) > 0) {
+        $output->writeln("<comment>Dependabot Github Security Check Report</comment>");
+        $output->writeln("<comment>=======================================</comment>");
+        $output->writeln("");
+        if(count($vulnerabilities)>0){
+            $output->writeln("<error>".count($vulnerabilities)." packages have known vulnerabilities</error>");
+            $output->writeln("");
+            foreach($vulnerabilities as $key=>$vuls){
+                $output->writeln("");
+                $output->writeln("<comment>".$key."</comment>");
+                $output->writeln("");
+                foreach($vuls as $vul){
+                    $output->writeln("<options=bold,underscore> * [".$vul["data"]->database_specific->severity.' severity] '.$vul["data"]->id.': '.$vul["data"]->summary."</>");
+                    $output->writeln("");
+                    foreach($vul["data"]->references as $reference){
+                        $output->writeln(' - <href='.$reference->url.'>'.$reference->url.'</>');
+                    }
+                }
+            }
+        }else{
+            $output->writeln("<info>No packages have known vulnerabilities.</info>");
+        }
+    
+        
+        if (\count($vulnerabilities) > 0) {
             return 1;
         }
 
