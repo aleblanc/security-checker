@@ -15,19 +15,7 @@ class SecurityChecker
         $this->crawler = null === $crawler ? new Crawler() : $crawler;
     }
 
-    /**
-     * Checks a composer.lock file.
-     *
-     * @param string $lock    The path to the composer.lock file
-     * @param string $format  The format of the result
-     * @param array  $headers An array of headers to add for this specific HTTP request
-     *
-     * @return Result
-     *
-     * @throws RuntimeException When the lock file does not exist
-     * @throws RuntimeException When the certificate can not be copied
-     */
-    public function check($lock, $format = 'json', array $headers = [])
+    public function check(string $lock, string $format = 'json'): string
     {
         if (0 !== strpos($lock, 'data://text/plain;base64,')) {
             if (is_dir($lock) && file_exists($lock.'/composer.lock')) {
@@ -41,7 +29,7 @@ class SecurityChecker
             }
         }
 
-        return $this->crawler->check($lock, $format, $headers);
+        return $this->crawler->check($lock, $format);
     }
 
     /**

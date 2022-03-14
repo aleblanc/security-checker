@@ -2,8 +2,6 @@
 
 namespace SensioLabs\Security;
 
-use SensioLabs\Security\Exception\HttpException;
-use SensioLabs\Security\Exception\RuntimeException;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Mime\Part\DataPart;
@@ -14,46 +12,15 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 class Crawler
 {
     private $endPoint = 'https://codeload.github.com/github/advisory-database/zip/main';
-    private $timeout = 20;
-    private $headers = [];
     
     
-    /**
-     * Adds a global header that will be sent with all requests to the server.
-     */
-    public function addHeader($key, $value)
+    public function check($lock, $format = 'json'): string
     {
-        $this->headers[] = $key . ': ' . $value;
+        return $this->doCheck($lock, $format);
     }
-    
-    /**
-     * Checks a Composer lock file.
-     *
-     * @param string $lock The path to the composer.lock file or a string able to be opened via file_get_contents
-     * @param string $format The format of the result
-     * @param array $headers An array of headers to add for this specific HTTP request
-     *
-     * @return Result
-     */
-    public function check($lock, $format = 'json', array $headers = [])
+
+    private function doCheck($lock, $format = 'json'): array
     {
-        return $this->doCheck($lock, $format, $headers);
-    }
-    
-    /**
-     * @return array An array where the first element is a headers string and second one the response body
-     */
-    private function doCheck($lock, $format = 'json', array $contextualHeaders = []): array
-    {
-        $client = HttpClient::create();
-        $body = new FormDataPart([
-            'lock' => new DataPart($this->getLockContents($lock), 'composer.lock'),
-        ]);
-        $headers = array_merge($this->headers, [
-            'Accept' => $this->getContentType($format),
-            'User-Agent' => sprintf('SecurityChecker-CLI/%s FGC PHP', SecurityChecker::VERSION),
-        ], $body->getPreparedHeaders()->toArray());
-        
         $lockContent = ($this->getLockContents($lock));
         //@todo serializer
         $decodeJson = \GuzzleHttp\json_decode($lockContent);
@@ -61,16 +28,10 @@ class Crawler
         $path = dirname(__FILE__) . '/../../../../var/cache/security-cheker/';
         $this->extractTo($this->endPoint,$path);
         
-        
-        //parse json files
-        
         $path = dirname(__FILE__) . '/../../../../var/cache/security-cheker/advisory-database-main/advisories/github-reviewed/';
-        $yaml = new Parser();
         $finder = new Finder();
-        $parsedData = array();
         $tmp = $finder->files()->in($path)->name('*.json')->depth('> 1');
         
-        $i = 0;
         foreach ($tmp as $t) {
             $decodeOneJson = \GuzzleHttp\json_decode(file_get_contents($t));
             foreach ($decodeOneJson->affected as $affected) {
@@ -109,7 +70,7 @@ class Crawler
         return $vulnerabilities;
     }
     
-    private function extractTo($fileUrl, $target_dir)
+    private function extractTo(string $fileUrl, string $target_dir): void
     {
         // @todo add check date for refresh
         @mkdir($target_dir);
@@ -128,25 +89,9 @@ class Crawler
                 throw new \Exception("File doesn't exist. '$fileZip'");
             }
         }
-        
-        return $this;
     }
     
-    private function getContentType($format)
-    {
-        static $formats = [
-            'text' => 'text/plain',
-            'simple' => 'text/plain',
-            'markdown' => 'text/markdown',
-            'yaml' => 'text/yaml',
-            'json' => 'application/json',
-            'ansi' => 'text/plain+ansi',
-        ];
-        
-        return isset($formats[$format]) ? $formats[$format] : 'text';
-    }
-    
-    private function getLockContents($lock)
+    private function getLockContents(string $lock): string
     {
         $contents = json_decode(file_get_contents($lock), true);
         $hash = isset($contents['content-hash']) ? $contents['content-hash'] : (isset($contents['hash']) ? $contents['hash'] : '');
