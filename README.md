@@ -1,4 +1,4 @@
-Symfony Security Checker
+Packagist Security Checker from Github advisory database
 ===========================
 
 Use [Github advisory database][1] for perform a [Symfony][2] security check.
@@ -13,3 +13,4 @@ composer require aleblanc/security-checker --dev
 php vendor/aleblanc/security-checker/security-checker al:security:check
 </pre>
 
+Fork from https://github.com/sensiolabs/security-checker

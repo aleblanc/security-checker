@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SecurityCheckerCommand extends Command
 {
-    protected static $defaultName = 'al:security:check';
+    protected static $defaultName = 'security:check';
 
     private $checker;
 
@@ -30,7 +30,7 @@ class SecurityCheckerCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('al:security:check')
+            ->setName('security:check')
             ->setDefinition([
                 new InputArgument('lockfile', InputArgument::OPTIONAL, 'The path to the composer.lock file', 'composer.lock')
             ])
@@ -68,8 +68,8 @@ EOF
         }
         
 
-        $output->writeln("<comment>Dependabot Github Security Check Report</comment>");
-        $output->writeln("<comment>=======================================</comment>");
+        $output->writeln("<comment>Packagist Github Security Check Report</comment>");
+        $output->writeln("<comment>======================================</comment>");
         $output->writeln("");
         if(count($vulnerabilities)>0){
             $output->writeln("<error>".count($vulnerabilities)." packages have known vulnerabilities</error>");

@@ -13,27 +13,26 @@ class Crawler
 {
     private $endPoint = 'https://codeload.github.com/github/advisory-database/zip/main';
     
-    
     public function check($lock, $format = 'json'): array
     {
         return $this->doCheck($lock, $format);
     }
-
+    
     private function doCheck($lock, $format = 'json'): array
     {
         $lockContent = ($this->getLockContents($lock));
         //@todo serializer
-        $decodeJson = \GuzzleHttp\json_decode($lockContent);
+        $decodeJson = json_decode($lockContent);
         
         $path = dirname(__FILE__) . '/../../../../var/cache/security-cheker/';
-        $this->extractTo($this->endPoint,$path);
+        $this->extractTo($this->endPoint, $path);
         
         $path = dirname(__FILE__) . '/../../../../var/cache/security-cheker/advisory-database-main/advisories/github-reviewed/';
         $finder = new Finder();
         $tmp = $finder->files()->in($path)->name('*.json')->depth('> 1');
         
         foreach ($tmp as $t) {
-            $decodeOneJson = \GuzzleHttp\json_decode(file_get_contents($t));
+            $decodeOneJson = json_decode(file_get_contents($t));
             foreach ($decodeOneJson->affected as $affected) {
                 if ($affected->package->ecosystem == "Packagist") {
                     foreach ($affected->ranges as $range) {
@@ -54,15 +53,15 @@ class Crawler
             }
         }
         $vulnerabilities = [];
-        foreach($decodeJson->packages as $lockPackage){
-            $version =  trim($lockPackage->version,'v');
-            if(isset($packages[$lockPackage->name])){
-                foreach($packages[$lockPackage->name] as $vulnerability){
-    
-                    if (version_compare($version,$vulnerability["introduced"], '>=') && version_compare($version,$vulnerability["fixed"], '<')) {
-                        $vulnerabilities[$lockPackage->name. ' ('.$version.')'][]=($vulnerability);
+        foreach ($decodeJson->packages as $lockPackage) {
+            $version = trim($lockPackage->version, 'v');
+            if (isset($packages[$lockPackage->name])) {
+                foreach ($packages[$lockPackage->name] as $vulnerability) {
+                    
+                    if (version_compare($version, $vulnerability["introduced"], '>=') && version_compare($version, $vulnerability["fixed"], '<')) {
+                        $vulnerabilities[$lockPackage->name . ' (' . $version . ')'][] = ($vulnerability);
                     }
-                
+                    
                 }
                 
             }
@@ -72,10 +71,9 @@ class Crawler
     
     private function extractTo(string $fileUrl, string $target_dir): void
     {
-        // @todo add check date for refresh
         @mkdir($target_dir);
         $fileZip = $target_dir . 'file.zip';
-        if(time() > ( filemtime($fileZip) + (60*60*2) ) ){
+        if (time() > (filemtime($fileZip) + (60 * 60 * 2))) {
             file_put_contents($fileZip, file_get_contents($fileUrl));
             $zip = new \ZipArchive();
             if (file_exists($fileZip)) {
