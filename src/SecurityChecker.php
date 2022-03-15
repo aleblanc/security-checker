@@ -6,7 +6,7 @@ use SensioLabs\Security\Exception\RuntimeException;
 
 class SecurityChecker
 {
-    const VERSION = '6.0';
+    const VERSION = '7.0';
 
     private $crawler;
 
@@ -32,12 +32,7 @@ class SecurityChecker
         return $this->crawler->check($lock, $format);
     }
 
-    /**
-     * @internal
-     *
-     * @return Crawler
-     */
-    public function getCrawler()
+    public function getCrawler(): Crawler
     {
         return $this->crawler;
     }
