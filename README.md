@@ -10,7 +10,7 @@ Use [Github advisory database][1] for perform a [Symfony][2] security check.
 
 <pre>
 composer require aleblanc/security-checker --dev
-php vendor/aleblanc/security-checker/security-checker al:security:check
+php vendor/aleblanc/security-checker/security-checker security:check
 </pre>
 
 Fork from https://github.com/sensiolabs/security-checker
