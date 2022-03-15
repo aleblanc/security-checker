@@ -73,7 +73,7 @@ class Crawler
     {
         @mkdir($target_dir);
         $fileZip = $target_dir . 'file.zip';
-        if (time() > (filemtime($fileZip) + (60 * 60 * 2))) {
+        if (!file_exists($fileZip) || time() > (filemtime($fileZip) + (60 * 60 * 2))) {
             file_put_contents($fileZip, file_get_contents($fileUrl));
             $zip = new \ZipArchive();
             if (file_exists($fileZip)) {
